@@ -11,7 +11,7 @@ UPLOAD_FOLDER = "uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 # Replace with your actual Gemini API Key
-client = genai.Client(api_key="AIzaSyCiXztweJMQYWwapESXvt2_CcXKUDhjLpQ")
+client = genai.Client(api_key="")
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for cross-origin requests
@@ -155,4 +155,5 @@ def analyze():
 # ==============================
 if __name__ == "__main__":
     # Running on 8080 as requested
+
     app.run(debug=True, port=8080)
