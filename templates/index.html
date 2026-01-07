@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXUS // ATS ANALYZER</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --n-cyan: #00f2ff;
+            --n-violet: #7000ff;
+            --n-dark: #020205;
+            --n-glass: rgba(10, 10, 18, 0.7);
+        }
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background-color: var(--n-dark);
+            background-image: 
+                linear-gradient(rgba(0, 242, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 242, 255, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            color: #d1d5db;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .hud-corner {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--n-cyan);
+            opacity: 0.5;
+        }
+
+        .glass {
+            background: var(--n-glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 242, 255, 0.15);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
+        }
+
+        .nexus-btn {
+            background: linear-gradient(135deg, var(--n-cyan) 0%, var(--n-violet) 100%);
+            color: black;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nexus-btn:hover {
+            box-shadow: 0 0 30px rgba(0, 242, 255, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .nexus-btn::after {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent);
+            transform: rotate(45deg);
+            transition: 0.6s;
+        }
+
+        .nexus-btn:hover::after {
+            left: 100%;
+        }
+
+        .scanline {
+            width: 100%;
+            height: 100px;
+            z-index: 10;
+            background: linear-gradient(0deg, rgba(0, 242, 255, 0) 0%, rgba(0, 242, 255, 0.1) 50%, rgba(0, 242, 255, 0) 100%);
+            position: absolute;
+            top: -100px;
+            left: 0;
+            animation: scan 3s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes scan {
+            0% { top: -100px; }
+            100% { top: 100%; }
+        }
+
+        .loader {
+            width: 60px;
+            height: 60px;
+            border: 2px solid rgba(0, 242, 255, 0.1);
+            border-top: 2px solid var(--n-cyan);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            box-shadow: 0 0 15px var(--n-cyan);
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .mono { font-family: 'JetBrains Mono', monospace; }
+
+        .result-pill {
+            border-left: 3px solid var(--n-cyan);
+            background: rgba(0, 242, 255, 0.05);
+        }
+    </style>
+</head>
+<body class="p-4 md:p-12 selection:bg-[var(--n-cyan)] selection:text-black">
+
+    <div class="fixed top-0 left-0 w-full h-full pointer-events-none opacity-20">
+        <div class="hud-corner top-4 left-4 border-b-0 border-r-0"></div>
+        <div class="hud-corner top-4 right-4 border-b-0 border-l-0"></div>
+        <div class="hud-corner bottom-4 left-4 border-t-0 border-r-0"></div>
+        <div class="hud-corner bottom-4 right-4 border-t-0 border-l-0"></div>
+    </div>
+
+    <div class="max-w-7xl mx-auto relative">
+        <header class="flex flex-col md:flex-row items-center justify-between mb-16 gap-4">
+            <div>
+                <h1 class="text-5xl md:text-7xl font-bold tracking-tight text-white">
+                    NEXUS <span class="text-[var(--n-cyan)] opacity-90">//</span> <span class="text-transparent bg-clip-text bg-gradient-to-r from-[var(--n-cyan)] to-[var(--n-violet)]">ATS</span>
+                </h1>
+                <p class="text-[var(--n-cyan)] mono text-xs mt-2 uppercase tracking-[0.5em] font-medium opacity-70">Synthesizing Professional Intelligence</p>
+            </div>
+            <div class="flex items-center gap-4 text-xs mono">
+                <div class="flex flex-col items-end">
+                    <span class="text-gray-500 uppercase">System Status</span>
+                    <span class="text-[var(--n-cyan)] glow-text">ONLINE // ENCRYPTED</span>
+                </div>
+                <div class="h-10 w-[1px] bg-gray-800"></div>
+                <div class="text-right">
+                    <span class="text-gray-500 uppercase">Version</span>
+                    <span class="block text-white">2.5-FLASH.09</span>
+                </div>
+            </div>
+        </header>
+
+        <main class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            <section class="lg:col-span-5 space-y-8">
+                <div class="glass p-8 rounded-2xl relative overflow-hidden group">
+                    <div class="scanline group-hover:opacity-100 opacity-0 transition-opacity"></div>
+                    <h3 class="text-xs mono text-[var(--n-cyan)] uppercase mb-6 flex items-center gap-2">
+                        <span class="w-2 h-2 bg-[var(--n-cyan)] animate-pulse"></span>
+                        Document Ingestion
+                    </h3>
+                    
+                    <div id="dropzone" class="border-2 border-dashed border-gray-800 rounded-xl p-10 text-center relative hover:border-[var(--n-cyan)] transition-all cursor-pointer">
+                        <input type="file" id="resumeFile" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" accept=".pdf">
+                        <div class="space-y-4">
+                            <svg class="mx-auto w-12 h-12 text-gray-600 group-hover:text-[var(--n-cyan)] transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                            </svg>
+                            <div>
+                                <p id="fileNameDisplay" class="text-white font-medium uppercase">Drop Nexus-Data PDF</p>
+                                <p class="text-gray-500 text-xs mt-1 mono">AUTOSCAN ENABLED</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass p-8 rounded-2xl">
+                    <h3 class="text-xs mono text-[var(--n-violet)] uppercase mb-6 flex items-center gap-2">
+                        <span class="w-2 h-2 bg-[var(--n-violet)] animate-pulse"></span>
+                        Target Parameters
+                    </h3>
+                    <textarea 
+                        id="jobDescription"
+                        class="w-full bg-[#050508] border border-gray-800 rounded-xl p-5 text-gray-300 focus:outline-none focus:ring-1 focus:ring-[var(--n-cyan)] h-64 resize-none mono text-sm leading-relaxed"
+                        placeholder="Paste target job description..."
+                    ></textarea>
+                </div>
+
+                <button 
+                    onclick="analyzeResume()" 
+                    id="analyzeBtn"
+                    class="w-full nexus-btn py-5 rounded-xl text-sm"
+                >
+                    Initiate Core Scan
+                </button>
+            </section>
+
+            <section class="lg:col-span-7">
+                <div id="welcomeState" class="glass rounded-2xl p-20 flex flex-col items-center justify-center text-center opacity-50 border-dashed">
+                    <div class="w-20 h-20 border border-gray-800 rounded-full flex items-center justify-center mb-6">
+                        <span class="text-4xl">⚡</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-400 uppercase">Awaiting Input</h2>
+                    <p class="text-gray-600 mono text-xs mt-2 uppercase tracking-widest">System standby // ready for synchronization</p>
+                </div>
+
+                <div id="loadingState" class="hidden glass rounded-2xl p-20 flex flex-col items-center justify-center">
+                    <div class="loader"></div>
+                    <div class="mt-8 text-center">
+                        <p class="text-[var(--n-cyan)] mono text-sm tracking-[0.3em] uppercase animate-pulse">Scanning Bio-Data...</p>
+                        <p class="text-gray-600 text-[10px] mono mt-2">PARSING NEURAL LAYERS 1-4</p>
+                    </div>
+                </div>
+
+                <div id="resultsArea" class="hidden space-y-6">
+                    <div class="glass p-8 rounded-2xl border-l-4 border-l-[var(--n-cyan)] relative overflow-hidden">
+                        <div class="absolute top-0 right-0 p-4 opacity-10">
+                            <svg width="100" height="100" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="283" /></svg>
+                        </div>
+                        <div class="flex items-end justify-between mb-8">
+                            <div>
+                                <h2 class="text-2xl font-bold text-white tracking-tight uppercase">Analysis Complete</h2>
+                                <p class="text-[var(--n-cyan)] mono text-[10px] uppercase">Nexus AI Verdict Generated</p>
+                            </div>
+                            <div id="matchScore" class="text-5xl font-black text-white italic">--%</div>
+                        </div>
+                        
+                        <div id="atsMatch" class="text-gray-300 text-sm leading-relaxed mono max-h-[500px] overflow-y-auto pr-4 space-y-4"></div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="glass p-6 rounded-xl border-t border-t-[var(--n-cyan)]/20">
+                            <h4 class="text-[10px] mono text-gray-500 uppercase mb-4 tracking-widest">Extracted Profile</h4>
+                            <div id="parsedResume" class="text-[11px] text-gray-400 space-y-2 max-h-40 overflow-y-auto pr-2"></div>
+                        </div>
+                        <div class="glass p-6 rounded-xl border-t border-t-[var(--n-violet)]/20">
+                            <h4 class="text-[10px] mono text-gray-500 uppercase mb-4 tracking-widest">JD Schema</h4>
+                            <div id="parsedJD" class="text-[11px] text-gray-400 space-y-2 max-h-40 overflow-y-auto pr-2"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div id="errorToast" class="fixed top-8 right-8 glass bg-red-950/40 border-red-500 text-red-200 px-6 py-4 rounded-xl hidden flex items-center gap-4 z-50">
+        <span class="w-2 h-2 bg-red-500 rounded-full animate-ping"></span>
+        <div class="mono text-xs uppercase tracking-wider">
+            <span class="font-bold block">System Fault</span>
+            <span id="errorMsg">Internal processing error</span>
+        </div>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('resumeFile');
+        const fileNameDisplay = document.getElementById('fileNameDisplay');
+        const resultsArea = document.getElementById('resultsArea');
+        const loadingState = document.getElementById('loadingState');
+        const welcomeState = document.getElementById('welcomeState');
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                fileNameDisplay.innerText = e.target.files[0].name.toUpperCase();
+                fileNameDisplay.classList.add('text-[var(--n-cyan)]');
+            }
+        });
+
+        async function analyzeResume() {
+            const resume = fileInput.files[0];
+            const jd = document.getElementById('jobDescription').value;
+
+            if (!resume || !jd) {
+                showError("INPUTS INCOMPLETE // LOAD PDF AND JD PARAMETERS");
+                return;
+            }
+
+            welcomeState.classList.add('hidden');
+            loadingState.classList.remove('hidden');
+            resultsArea.classList.add('hidden');
+            document.getElementById('analyzeBtn').disabled = true;
+
+            const formData = new FormData();
+            formData.append('resume', resume);
+            formData.append('job_description', jd);
+
+            try {
+                // Changed to relative URL for seamless Flask integration
+                const response = await fetch('/analyze', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    displayResults(data);
+                } else {
+                    showError(data.error || "CORE SYST_ERR: ANALYSIS ABORTED");
+                }
+            } catch (err) {
+                showError("CONNECTION FAULT // CHECK SERVER STATUS");
+            } finally {
+                loadingState.classList.add('hidden');
+                document.getElementById('analyzeBtn').disabled = false;
+            }
+        }
+
+        function displayResults(data) {
+            resultsArea.classList.remove('hidden');
+            
+            // Extract percentage
+            const scoreMatch = data.ats_result.match(/(\d+)%/);
+            if (scoreMatch) {
+                document.getElementById('matchScore').innerText = scoreMatch[0];
+                document.getElementById('matchScore').className = parseInt(scoreMatch[1]) > 70 
+                    ? "text-5xl font-black text-[var(--n-cyan)] italic" 
+                    : "text-5xl font-black text-amber-500 italic";
+            } else {
+                document.getElementById('matchScore').innerText = "SCAN";
+            }
+
+            document.getElementById('atsMatch').innerHTML = formatLines(data.ats_result);
+            document.getElementById('parsedResume').innerHTML = formatLines(data.parsed_resume);
+            document.getElementById('parsedJD').innerHTML = formatLines(data.parsed_job_description);
+
+            resultsArea.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function formatLines(text) {
+            if (!text) return "";
+            return text
+                .split('\n')
+                .filter(l => l.trim())
+                .map(line => {
+                    if (line.trim().startsWith('-') || line.trim().startsWith('*')) {
+                        return `<div class="result-pill py-2 px-4 mb-2 ml-2 text-xs opacity-90">${line.replace(/^[-*]\s*/, '')}</div>`;
+                    }
+                    if (line.includes(':')) {
+                        const parts = line.split(':');
+                        return `<p class="mt-4 mb-2 text-white font-bold text-xs uppercase tracking-widest">${parts[0]} <span class="text-[var(--n-cyan)] opacity-50">//</span> ${parts.slice(1).join(':')}</p>`;
+                    }
+                    return `<p class="mb-2 text-gray-500 text-[10px] mono uppercase">${line}</p>`;
+                })
+                .join('');
+        }
+
+        function showError(msg) {
+            const toast = document.getElementById('errorToast');
+            document.getElementById('errorMsg').innerText = msg;
+            toast.classList.remove('hidden');
+            setTimeout(() => toast.classList.add('hidden'), 5000);
+        }
+    </script>
+</body>
+</html>
